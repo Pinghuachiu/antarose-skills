@@ -1,0 +1,10 @@
+# Environment variables and secrets
+resource.md
+.env
+*.env
+
+# Generated files
+generated_image.*
+openai_response.json
+*.jpg
+*.png
