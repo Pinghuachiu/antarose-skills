@@ -1,0 +1,70 @@
+{
+  "linkedin": {
+    "api_version": "202210",
+    "base_url": "https://api.linkedin.com",
+    "endpoints": {
+      "posts": "https://api.linkedin.com/rest/posts",
+      "userinfo": "https://api.linkedin.com/v2/userinfo",
+      "assets": "https://api.linkedin.com/assets"
+    },
+    "authentication": {
+      "method": "access_token",
+      "token_generator_url": "https://www.linkedin.com/developers/tools/oauth/token-generator",
+      "token_validity_days": 60,
+      "required_scopes": [
+        "w_member_social"
+      ],
+      "optional_scopes": [
+        "w_organization_social",
+        "r_emailaddress",
+        "r_liteprofile"
+      ]
+    },
+    "limits": {
+      "text_max_length": 3000,
+      "image_max_size_mb": 5,
+      "image_formats": ["jpg", "jpeg", "png", "gif"],
+      "rate_limit_per_day": "varies"
+    },
+    "urn_formats": {
+      "person": "urn:li:person:{person_id}",
+      "organization": "urn:li:organization:{organization_id}"
+    },
+    "post_types": {
+      "text": {
+        "required_fields": ["author", "commentary", "visibility", "lifecycleState"],
+        "optional_fields": ["distribution", "isReshareDisabledByAuthor"]
+      },
+      "image": {
+        "required_fields": ["author", "commentary", "content", "visibility", "lifecycleState"],
+        "upload_steps": 3
+      },
+      "link": {
+        "required_fields": ["author", "commentary", "content", "visibility", "lifecycleState"],
+        "content_format": "article"
+      }
+    },
+    "database": {
+      "table": "channal_info",
+      "fields": {
+        "channal_id": "頻道 ID（主鍵）",
+        "channal_name": "頻道名稱",
+        "channal_source": "平台來源（固定為 'linkedin'）",
+        "page_id": "LinkedIn Person URN 或 ID",
+        "access_token": "LinkedIn Access Token"
+      },
+      "example_query": "SELECT * FROM channal_info WHERE channal_source = 'linkedin'"
+    },
+    "headers": {
+      "LinkedIn-Version": "202210",
+      "X-Restli-Protocol-Version": "2.0.0",
+      "Authorization": "Bearer {ACCESS_TOKEN}",
+      "Content-Type": "application/json"
+    },
+    "examples": {
+      "person_urn": "urn:li:person:785XXXX",
+      "organization_urn": "urn:li:organization:1234567",
+      "access_token": "AQXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    }
+  }
+}
