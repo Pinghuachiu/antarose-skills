@@ -28,15 +28,20 @@ def fetch_task(task_id: str) -> dict:
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-    params = {"ids": [task_id]}
+    body = {"ids": [task_id]}
 
     try:
-        response = requests.get(url, params=params, headers=headers)
+        # AllAPI requires POST method for fetch
+        response = requests.post(url, json=body, headers=headers)
         response.raise_for_status()
-        data = response.json()
+        result = response.json()
 
-        if data and len(data) > 0:
-            return data[0]
+        # Parse response format: {"code": "success", "data": [...]}
+        if result.get("code") == "success":
+            data_list = result.get("data", [])
+            if data_list and len(data_list) > 0:
+                return data_list[0]
+
         return {}
     except requests.exceptions.RequestException as e:
         print(f"Error fetching task: {e}", file=sys.stderr)
