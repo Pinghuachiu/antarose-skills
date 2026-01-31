@@ -1,0 +1,49 @@
+{
+  "examples": {
+    "single_photo": {
+      "description": "發布單張圖片到 Instagram",
+      "command": "python3 scripts/post.py --action photo --from-db --channel-id 1 --caption \"Hello Instagram!\" --image-url \"https://i.pix2.io/image.jpg\"",
+      "use_case": "單一產品展示、風景照片、圖文貼文"
+    },
+    "video": {
+      "description": "發布影片到 Instagram",
+      "command": "python3 scripts/post.py --action video --from-db --channel-id 1 --caption \"Check this video!\" --video-url \"https://example.com/video.mp4\"",
+      "use_case": "Reels、產品演示影片、品牌故事",
+      "note": "影片處理需要時間，請耐心等待"
+    },
+    "carousel": {
+      "description": "發布多張圖片（Carousel）",
+      "command": "python3 scripts/post.py --action carousel --from-db --channel-id 1 --caption \"Product Gallery\" --image-urls \"url1,url2,url3,url4,url5\"",
+      "use_case": "產品系列展示、多角度展示、顏色選擇",
+      "note": "支援 2-10 張圖片"
+    },
+    "get_ig_id": {
+      "description": "取得 Instagram Business Account ID",
+      "command": "python3 scripts/post.py --action get-ig-id --from-db --channel-id 1",
+      "use_case": "查看或確認 Instagram 帳號 ID",
+      "output": "Instagram Business ID: 17841402854360694"
+    }
+  },
+  "integration": {
+    "with_pix2": {
+      "description": "結合 pix2-upload 使用",
+      "steps": [
+        "1. 上傳圖片到 Pix2",
+        "2. 取得圖片 URL",
+        "3. 發布到 Instagram"
+      ],
+      "example": "# 上傳並發布\nIMAGE_URL=$(python3 .claude/skills/pix2-upload/scripts/upload.py photo.jpg)\npython3 scripts/post.py --action photo --from-db --channel-id 1 --caption \"My photo\" --image-url \"$IMAGE_URL\""
+    },
+    "with_social_content_writer": {
+      "description": "結合 social-content-writer 使用",
+      "steps": [
+        "1. 生成 Instagram 內容",
+        "2. 生成圖片",
+        "3. 發布到 Instagram"
+      ],
+      "example": "# 完整流程\npython3 ../social-content-writer/scripts/write-content.py --topic \"新產品\" --platform instagram --output content.json\npython3 ../social-content-writer/scripts/prompt-generator.py --content content.json --auto-generate --upload-pix2\npython3 scripts/post.py --action photo --from-db --channel-id 1 --caption \"$(jq -r '.content' content.json)\" --image-url \"$(jq -r '.prompts.image[0].url' content.json)\""
+    }
+  },
+  "instagram_business_account_id": "17841402854360694",
+  "note": "這是從資料庫取得的 Instagram Business Account ID，您可以將此 ID 用於後續的發布"
+}

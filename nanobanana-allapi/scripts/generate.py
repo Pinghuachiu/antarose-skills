@@ -94,16 +94,27 @@ def generate_image(prompt="", images=None, aspect_ratio="1:1", image_size="2K", 
         ]
     }
 
-    # Flash 模型不支援 generationConfig 中的某些參數
-    # 只有 Pro 模型才添加這些配置
-    if model == MODEL_PRO:
-        payload["generationConfig"] = {
-            "responseModalities": ["IMAGE"],
-            "imageConfig": {
-                "aspectRatio": aspect_ratio,
-                "imageSize": image_size
-            }
+    # Pro 和 Flash 模型都支援 generationConfig
+    # 添加圖片生成配置（寬高比、尺寸）
+    payload["generationConfig"] = {
+        "responseModalities": ["IMAGE"],
+        "imageConfig": {
+            "aspectRatio": aspect_ratio,
+            "imageSize": image_size
         }
+    }
+
+    # 🖨️ 打印發送到 API 的內容（除錯用）
+    print("=" * 60)
+    print("📤 發送到 API 的請求內容：")
+    print("=" * 60)
+    print(f"🔗 API URL: {api_url}")
+    print(f"📝 Prompt (提示詞):\n{prompt}")
+    print(f"📐 寬高比: {aspect_ratio}")
+    print(f"📏 圖片大小: {image_size}")
+    print(f"🤖 模型: {model}")
+    print(f"🖼️ 參考圖片數量: {len(images) if images else 0}")
+    print("=" * 60)
 
     # 發送請求
     params = {"key": API_KEY}
@@ -163,22 +174,24 @@ def main():
 
         # 提取并保存图片
         if 'candidates' in result and len(result['candidates']) > 0:
-            parts = result['candidates'][0].get('content', {}).get('parts', [])
+            content = result['candidates'][0].get('content')
+            parts = content.get('parts', []) if isinstance(content, dict) else []
             # 遍歷所有 parts 找到包含 inlineData 的部分
             image_found = False
-            for part in parts:
-                if 'inlineData' in part:
-                    image_data = part['inlineData']['data']
-                    image_type = part['inlineData'].get('mimeType', 'image/jpeg')
-                    ext = 'png' if 'png' in image_type else 'jpg'
+            if parts:  # 確保 parts 不是 None 且不是空列表
+                for part in parts:
+                    if 'inlineData' in part:
+                        image_data = part['inlineData']['data']
+                        image_type = part['inlineData'].get('mimeType', 'image/jpeg')
+                        ext = 'png' if 'png' in image_type else 'jpg'
 
-                    # 保存图片
-                    output_file = f"generated_image.{ext}"
-                    with open(output_file, 'wb') as f:
-                        f.write(base64.b64decode(image_data))
-                    print(f"图片已保存到: {output_file}")
-                    image_found = True
-                    break
+                        # 保存图片
+                        output_file = f"generated_image.{ext}"
+                        with open(output_file, 'wb') as f:
+                            f.write(base64.b64decode(image_data))
+                        print(f"图片已保存到: {output_file}")
+                        image_found = True
+                        break
 
             if not image_found:
                 print("生成结果中未找到图片数据")

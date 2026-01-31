@@ -143,17 +143,19 @@ node .opencode/skills/nanobanana-allapi/scripts/generate.js \
 
 #### generationConfig 說明
 
+**重要**: Pro 和 Flash 模型都支援 `generationConfig`。腳本已修復，兩個模型都會正確接收 aspectRatio 和 imageSize 參數。
+
 - `responseModalities`: 返回類型，必須包含 `["IMAGE"]`
 - `imageConfig`:
   - `aspectRatio`: 寬高比
     - Pro 版本支援：`1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `16:10`, `21:9`
     - Flash 版本支援：`1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`
-  - `imageSize`: 圖片大小和分辨率（僅 Pro 版本支援多級別）
+  - `imageSize`: 圖片大小和分辨率
     - `1K`: 1024x1024 (1:1) 等
     - `HIGH`: 高品質（別名，等同於 2K）
-    - `MEDIUM`: 中等品質（Flash 版本預設）
+    - `MEDIUM`: 中等品質（Flash 版本預設，使用固定 1290 tokens）
     - `2K`: 2048x2048 (1:1) 等
-    - `4K`: 4096x4096 (1:1) 等
+    - `4K`: 4096x4096 (1:1) 等（僅 Pro 版本）
 
 ## 分辨率詳解
 
@@ -447,3 +449,19 @@ node scripts/generate.js "快速生成" --model flash
 本技能使用 AllAPI (allapi.store) 提供的 NanoBanana 3 Pro Image API。Base URL 已設置為 `https://allapi.store/v1beta`。
 
 如需獲取 AllAPI 的 API Key，請訪問 https://help.allapi.store
+
+## 更新日誌
+
+### 2026-01-29 - 修復 Flash 模型配置支援
+
+**問題**: Flash 模型無法使用 `--ratio` 和 `--size` 參數
+
+**原因**: 腳本錯誤地只為 Pro 模型添加 `generationConfig`，導致 Flash 模型忽略這些參數
+
+**修復**:
+- 移除了錯誤的條件判斷 `if model == MODEL_PRO:`
+- 現在 Pro 和 Flash 模型都會正確接收 `generationConfig`
+- Flash 模型支援 `aspectRatio` 參數（9:16, 16:9 等）
+- Flash 模型的 `imageSize` 會自動調整為 MEDIUM（固定 1290 tokens）
+
+**影響**: 現在使用 `--model=flash --ratio=9:16 --size=4K` 時，Flash 模型會正確使用 9:16 比例生成圖片

@@ -28,9 +28,19 @@ def send_message(content, username=None, avatar_url=None, tts=False):
     try:
         response = requests.post(str(WEBHOOK_URL), json=payload)
         response.raise_for_status()
-        result = response.json()
-        print(f"✅ 訊息發送成功 - ID: {result.get('id', 'N/A')}")
-        return result
+
+        # Discord Webhook 成功時返回 204 No Content（沒有響應體）
+        if response.status_code == 204:
+            print("✅ 訊息發送成功")
+            return {"success": True}
+
+        # 如果有響應內容，嘗試解析 JSON
+        if response.content:
+            result = response.json()
+            print(f"✅ 訊息發送成功 - ID: {result.get('id', 'N/A')}")
+            return result
+
+        return {"success": True}
     except requests.exceptions.RequestException as e:
         print(f"❌ 訊息發送失敗: {e}", file=sys.stderr)
         if response := getattr(e, 'response', None):
@@ -58,9 +68,19 @@ def send_embed(title, description=None, color=0x5865F2, fields=None, thumbnail=N
     try:
         response = requests.post(str(WEBHOOK_URL), json=payload)
         response.raise_for_status()
-        result = response.json()
-        print(f"✅ Embed 發送成功 - ID: {result.get('id', 'N/A')}")
-        return result
+
+        # Discord Webhook 成功時返回 204 No Content（沒有響應體）
+        if response.status_code == 204:
+            print("✅ Embed 發送成功")
+            return {"success": True}
+
+        # 如果有響應內容，嘗試解析 JSON
+        if response.content:
+            result = response.json()
+            print(f"✅ Embed 發送成功 - ID: {result.get('id', 'N/A')}")
+            return result
+
+        return {"success": True}
     except requests.exceptions.RequestException as e:
         print(f"❌ Embed 發送失敗: {e}", file=sys.stderr)
         if response := getattr(e, 'response', None):
@@ -87,9 +107,19 @@ def send_attachment(file_path, content=None, username=None):
                 files=files
             )
             response.raise_for_status()
-            result = response.json()
-            print(f"✅ 附件發送成功 - ID: {result.get('id', 'N/A')}")
-            return result
+
+            # Discord Webhook 成功時返回 204 No Content（沒有響應體）
+            if response.status_code == 204:
+                print("✅ 附件發送成功")
+                return {"success": True}
+
+            # 如果有響應內容，嘗試解析 JSON
+            if response.content:
+                result = response.json()
+                print(f"✅ 附件發送成功 - ID: {result.get('id', 'N/A')}")
+                return result
+
+            return {"success": True}
     except FileNotFoundError:
         print(f"❌ 檔案不存在: {file_path}", file=sys.stderr)
         sys.exit(1)

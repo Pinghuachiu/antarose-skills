@@ -1,34 +1,122 @@
 ---
 name: pix2-upload
-description: 使用 Pix2 API 上傳檔案到圖床服務，支援 PNG、JPEG、WebP、MP3、MP4 格式
+description: 使用 Pix2 API 上傳檔案到圖床服務，支援 PNG、JPEG、WebP、MP3、MP4 格式，自動處理 MIME 類型
+metadata:
+  category: storage
+  type: upload
+  languages:
+    - python
+    - bash
 ---
 
 # Pix2 圖床上傳技能
 
 使用 Pix2 API 上傳檔案到圖床服務，支援 PNG、JPEG、WebP、MP3、MP4 格式。
 
+## 功能特性
+
+- ✅ 自動檢測文件類型
+- ✅ 自動設置正確的 MIME 類型
+- ✅ 支援圖片：PNG、JPG、JPEG、WebP
+- ✅ 支援音頻：MP3
+- ✅ 支援視頻：MP4
+- ✅ 文件大小限制：50MB
+- ✅ 永久保存（API Key 上傳）
+- ✅ CDN 加速
+
 ## API 資訊
 
-- **Production API URL**: `https://api.pix2.io/api/images`
+- **API URL**: `https://api.pix2.io/api/images`
 - **API Key**: `23df301b63a33587541a8680ef9472b9`
-- **最大檔案大小**: 50MB
-- **支援格式**: PNG、JPG、JPEG、WebP、MP3、MP4
+- **環境變量**: `PIX2_API_KEY`
 
-## 支援的檔案類型
+## 快速開始
 
-- 圖片: `image/png`, `image/jpeg`, `image/jpg`, `image/webp`
-- 音訊: `audio/mpeg` (MP3)
-- 影片: `video/mp4` (MP4)
-
-## 使用方法
-
-### 使用 curl 上傳
+### Python 腳本（推薦）
 
 ```bash
+# 上傳圖片
+python3 .claude/skills/pix2-upload/scripts/upload.py photo.jpg
+
+# 上傳 MP3 音頻
+python3 .claude/skills/pix2-upload/scripts/upload.py song.mp3
+
+# 上傳 MP4 視頻
+python3 .claude/skills/pix2-upload/scripts/upload.py video.mp4
+
+# JSON 格式輸出
+python3 .claude/skills/pix2-upload/scripts/upload.py file.png --json
+```
+
+### curl 命令
+
+**重要**: 上傳 MP3/MP4 時必須指定 MIME 類型：
+
+```bash
+# 上傳圖片
 curl -X POST "https://api.pix2.io/api/images" \
   -H "x-api-key: 23df301b63a33587541a8680ef9472b9" \
-  -F "file=@/path/to/your/file.ext"
+  -F "file=@image.jpg"
+
+# 上傳 MP3（必須指定 MIME 類型）
+curl -X POST "https://api.pix2.io/api/images" \
+  -H "x-api-key: 23df301b63a33587541a8680ef9472b9" \
+  -F "file=@audio.mp3;type=audio/mpeg"
+
+# 上傳 MP4（必須指定 MIME 類型）
+curl -X POST "https://api.pix2.io/api/images" \
+  -H "x-api-key: 23df301b63a33587541a8680ef9472b9" \
+  -F "file=@video.mp4;type=video/mp4"
 ```
+
+## 返回格式
+
+### 成功響應
+
+```json
+{
+  "success": true,
+  "id": "LJPy72mm",
+  "url": "https://pix2.io/LJPy72mm",
+  "directUrl": "https://i.pix2.io/LJPy72mm.mp3",
+  "originalName": "song.mp3",
+  "size": 5180229,
+  "contentType": "audio/mpeg",
+  "uploadTime": "2026-01-29T05:37:34.039Z"
+}
+```
+
+### 連結格式
+
+| 文件類型 | Short URL | Direct URL |
+|---------|-----------|------------|
+| 圖片 | `https://pix2.io/xxxxx` | `https://i.pix2.io/xxxxx.jpg` |
+| MP3 | `https://pix2.io/xxxxx` | `https://i.pix2.io/xxxxx.mp3` |
+| MP4 | `https://pix2.io/xxxxx` | `https://i.pix2.io/xxxxx.mp4` |
+
+## 🔧 關鍵修復
+
+### MP3/MP4 上傳問題
+
+**問題**: 直接上傳 MP3/MP4 會返回 "Invalid file type" 錯誤
+
+**原因**: Pix2 API 需要明確指定 MIME 類型
+
+**解決方案**: 在 multipart form-data 中指定 MIME 類型
+
+**Python 實現**:
+```python
+files = {
+    'file': (filename, open(file_path, 'rb'), 'audio/mpeg')  # MP3
+}
+```
+
+**curl 實現**:
+```bash
+-F "file=@audio.mp3;type=audio/mpeg"
+```
+
+腳本會自動處理這個問題，無需手動設置！
 
 ### 使用 Python 上傳
 
